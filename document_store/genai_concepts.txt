@@ -1,0 +1,64 @@
+Generative artificial intelligence, commonly referred to as GenAI, 
+is a category of artificial intelligence systems capable of producing 
+new content such as text, code, images, or structured data in response 
+to user input. In modern web applications, GenAI is primarily integrated 
+through externally hosted large language models accessed via application 
+programming interfaces. These models are not deployed locally within the 
+application but are hosted on remote inference servers operated by providers 
+such as OpenAI, Google, and Anthropic. The web application sends a request 
+containing user input to the inference API and receives a generated response, 
+making the inference service a remote dependency rather than an embedded component.
+
+Large language models generate text using a mechanism called autoregressive decoding,
+in which output tokens are produced one at a time in sequence. Each token is generated 
+based on the full context of the input prompt and all previously generated tokens. 
+This sequential dependency means that the total response time cannot be known in advance 
+because the length of the generated output varies with the nature of the user request. 
+Two metrics define LLM inference latency: Time to First Token, which measures the delay 
+between request submission and the appearance of the first output token, and Time Per 
+Output Token, which measures the duration required to produce each subsequent token. 
+Total response time is therefore a function of both values combined with the total 
+number of tokens generated.
+
+The request lifecycle in a GenAI-integrated web application differs structurally from a 
+traditional HTTP request. When a user submits a query, the web backend receives the request, 
+constructs the appropriate prompt or input payload, transmits it to the external inference API, 
+and holds the connection open while the model generates its response. Because output length is 
+variable and cannot be predicted at request arrival, the server connection must remain active 
+for an indeterminate duration. This also means that server memory consumption per request is 
+not fixed: the model maintains intermediate attention states in a key-value cache that grows 
+as additional tokens are produced, introducing dynamic memory growth that scales with output 
+length and the number of concurrent requests being served simultaneously.
+
+Modern GenAI-integrated applications increasingly operate as compound AI systems rather than 
+single-model inference pipelines. A compound AI system processes a user request through multiple 
+coordinated stages, which may include an initial retrieval step that fetches relevant documents 
+from a vector database, one or more calls to a large language model, and a post-processing step 
+that formats or validates the output before returning it to the client. Each stage in the pipeline 
+consumes a share of the total available response time and server resources. Managing the flow 
+of data between these stages, preserving intermediate state, and distributing latency across the 
+full pipeline are responsibilities that fall on the web framework layer operating within the 
+backend application.
+
+The web framework in a GenAI-integrated application functions as an orchestration layer that 
+sits between the client interface and the external inference API. It receives incoming HTTP 
+requests, applies routing and middleware logic, constructs inference inputs, calls external 
+services, and returns responses to the client. In Python-based web applications, frameworks 
+implement one of two execution models to handle concurrent requests. The synchronous model, 
+standardized by the Web Server Gateway Interface specification, assigns a dedicated worker 
+thread to each incoming request for its full duration. The asynchronous model, standardized 
+by the Asynchronous Server Gateway Interface specification, uses an event loop to interleave 
+multiple requests within a single thread by yielding control during external I/O operations 
+such as API calls.
+
+Python is the dominant programming language in the artificial intelligence and machine learning 
+ecosystem, and its web frameworks are the primary environment in which GenAI services are deployed 
+and orchestrated. Among the most widely adopted frameworks, Flask and Django represent the synchronous 
+blocking execution model operating under the WSGI interface. Flask is a lightweight micro-framework 
+providing only core routing and request handling, while Django is a full-stack framework with 
+integrated components including an object-relational mapper, authentication system, and middleware 
+pipeline. FastAPI represents the asynchronous non-blocking model under the ASGI specification, 
+enabling concurrent handling of multiple long-duration inference connections through native async 
+and await syntax. Tornado implements its own native non-blocking event loop integrated with Python's 
+asyncio library, providing direct control over connection lifecycle management and supporting 
+sustained server-client communication patterns characteristic of GenAI workloads.

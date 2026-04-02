@@ -1,0 +1,26 @@
+# Virtual environment
+venv/
+
+# API keys
+.env
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Test data (large CSV files generated during experiment)
+data/
+logs/
+results/
+
+# Calibration data (generated, not committed)
+simulated_endpoint/calibration.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
