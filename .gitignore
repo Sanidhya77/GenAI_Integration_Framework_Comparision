@@ -17,6 +17,7 @@ results/
 # Calibration data (generated, not committed)
 simulated_endpoint/calibration.json
 
+Experiment_Guide.md
 # OS files
 .DS_Store
 Thumbs.db

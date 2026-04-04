@@ -20,7 +20,7 @@ worker_class = "sync"     # Default synchronous worker (WSGI)
 threads = 1               # Single thread per worker
 
 # Timeouts
-timeout = 120             # Allow long GenAI inference responses
+timeout = 600             # Allow long GenAI inference responses
 graceful_timeout = 30
 keepalive = 5
 

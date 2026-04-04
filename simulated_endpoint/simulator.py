@@ -114,7 +114,7 @@ class SimulatedStreamHandler(tornado.web.RequestHandler):
 
     async def post(self):
         tokens_per_second = CALIBRATION["tokens_per_second"]
-        total_tokens = CALIBRATION["total_output_tokens"]
+        total_tokens = CALIBRATION.get("streaming_chunks", 12)
         delay_per_token = 1.0 / tokens_per_second
 
         self.set_header("Content-Type", "text/event-stream")
