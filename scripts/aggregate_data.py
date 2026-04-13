@@ -501,183 +501,227 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
     print("GENERATING CHARTS")
     print("=" * 60)
 
+    # Colorblind-friendly palette with neutral gray for overlap-heavy series.
     colors = {
-        "flask": "#2196F3",
-        "django": "#4CAF50",
-        "fastapi": "#FF9800",
-        "tornado": "#9C27B0",
+        "flask": "#6E6E6E",   # gray
+        "django": "#0072B2",  # blue
+        "fastapi": "#D55E00", # red-orange
+        "tornado": "#009E73", # green
     }
 
+    line_styles = {
+        "flask": "-",
+        "django": "-",
+        "fastapi": "-",
+        "tornado": "-",
+    }
+    line_offsets = {
+        "flask": -0.06,
+        "django": -0.02,
+        "fastapi": 0.02,
+        "tornado": 0.06,
+    }
+    framework_markers = {
+        "flask": "o",
+        "django": "s",
+        "fastapi": "^",
+        "tornado": "D",
+    }
+    framework_zorder = {
+        "flask": 2,
+        "django": 3,
+        "fastapi": 4,
+        "tornado": 5,
+    }
+    line_width = 2.8
+    marker_size = 8.0
+    marker_edge_width = 1.8
+
+    def offset_concurrency_values(values, framework):
+        offset = line_offsets[framework]
+        return [round(value * (1 + offset), 6) for value in values]
+
+    def style_framework_axes(ax, title, ylabel):
+        ax.set_xlabel("Concurrency Level")
+        ax.set_ylabel(ylabel)
+        ax.set_title(title)
+        ax.legend(ncol=2, frameon=True)
+        ax.grid(True, which="both", alpha=0.25, linestyle="--")
+        ax.set_xscale("log", base=2)
+        ax.set_xticks(CONCURRENCY_LEVELS)
+        ax.set_xticklabels(CONCURRENCY_LEVELS)
+        ax.set_xlim(min(CONCURRENCY_LEVELS) * 0.85, max(CONCURRENCY_LEVELS) * 1.15)
+
+    def plot_framework_lines(ax, records, endpoint, value_key):
+        for fw in FRAMEWORKS:
+            fw_data = sorted(
+                [r for r in records if r["framework"] == fw and r["endpoint"] == endpoint],
+                key=lambda row: row["concurrency"],
+            )
+            if fw_data:
+                x = offset_concurrency_values([r["concurrency"] for r in fw_data], fw)
+                y = [r[value_key] for r in fw_data]
+                ax.plot(
+                    x,
+                    y,
+                    marker=framework_markers[fw],
+                    linestyle=line_styles[fw],
+                    label=fw.capitalize(),
+                    color=colors[fw],
+                    linewidth=line_width,
+                    markersize=marker_size,
+                    markerfacecolor="white",
+                    markeredgewidth=marker_edge_width,
+                    markeredgecolor=colors[fw],
+                    alpha=1.0,
+                    zorder=framework_zorder[fw],
+                )
+
     # --- Chart 1: Response Time vs Concurrency (Inference) ---
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for fw in FRAMEWORKS:
-        fw_data = [r for r in locust_data if r["framework"] == fw and r["endpoint"] == "inference"]
-        if fw_data:
-            x = [r["concurrency"] for r in fw_data]
-            y = [r["response_time_median_ms"] for r in fw_data]
-            ax.plot(x, y, marker="o", label=fw.capitalize(), color=colors[fw], linewidth=2)
-    ax.set_xlabel("Concurrency Level")
-    ax.set_ylabel("Median Response Time (ms)")
-    ax.set_title("Inference: Response Time vs Concurrency")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    ax.set_xscale("log", base=2)
-    ax.set_xticks(CONCURRENCY_LEVELS)
-    ax.set_xticklabels(CONCURRENCY_LEVELS)
-    plt.tight_layout()
-    plt.savefig(os.path.join(CHARTS_DIR, "response_time_inference.png"), dpi=150)
+    fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
+    plot_framework_lines(ax, locust_data, "inference", "response_time_median_ms")
+    style_framework_axes(ax, "Inference: Response Time vs Concurrency", "Median Response Time (ms)")
+    plt.savefig(os.path.join(CHARTS_DIR, "response_time_inference.png"), dpi=180, bbox_inches="tight")
     plt.close()
     print("  Saved: response_time_inference.png")
 
     # --- Chart 2: Throughput vs Concurrency (Inference) ---
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for fw in FRAMEWORKS:
-        fw_data = [r for r in locust_data if r["framework"] == fw and r["endpoint"] == "inference"]
-        if fw_data:
-            x = [r["concurrency"] for r in fw_data]
-            y = [r["throughput_median_rps"] for r in fw_data]
-            ax.plot(x, y, marker="s", label=fw.capitalize(), color=colors[fw], linewidth=2)
-    ax.set_xlabel("Concurrency Level")
-    ax.set_ylabel("Throughput (req/s)")
-    ax.set_title("Inference: Throughput vs Concurrency")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    ax.set_xscale("log", base=2)
-    ax.set_xticks(CONCURRENCY_LEVELS)
-    ax.set_xticklabels(CONCURRENCY_LEVELS)
-    plt.tight_layout()
-    plt.savefig(os.path.join(CHARTS_DIR, "throughput_inference.png"), dpi=150)
+    fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
+    plot_framework_lines(ax, locust_data, "inference", "throughput_median_rps")
+    style_framework_axes(ax, "Inference: Throughput vs Concurrency", "Throughput (req/s)")
+    plt.savefig(os.path.join(CHARTS_DIR, "throughput_inference.png"), dpi=180, bbox_inches="tight")
     plt.close()
     print("  Saved: throughput_inference.png")
 
     # --- Chart 3: Response Time vs Concurrency (Stream) ---
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for fw in FRAMEWORKS:
-        fw_data = [r for r in locust_data if r["framework"] == fw and r["endpoint"] == "stream"]
-        if fw_data:
-            x = [r["concurrency"] for r in fw_data]
-            y = [r["response_time_median_ms"] for r in fw_data]
-            ax.plot(x, y, marker="o", label=fw.capitalize(), color=colors[fw], linewidth=2)
-    ax.set_xlabel("Concurrency Level")
-    ax.set_ylabel("Median Response Time (ms)")
-    ax.set_title("Streaming: Response Time vs Concurrency")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    ax.set_xscale("log", base=2)
-    ax.set_xticks(CONCURRENCY_LEVELS)
-    ax.set_xticklabels(CONCURRENCY_LEVELS)
-    plt.tight_layout()
-    plt.savefig(os.path.join(CHARTS_DIR, "response_time_stream.png"), dpi=150)
+    fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
+    plot_framework_lines(ax, locust_data, "stream", "response_time_median_ms")
+    style_framework_axes(ax, "Streaming: Response Time vs Concurrency", "Median Response Time (ms)")
+    plt.savefig(os.path.join(CHARTS_DIR, "response_time_stream.png"), dpi=180, bbox_inches="tight")
     plt.close()
     print("  Saved: response_time_stream.png")
 
     # --- Chart 4: Throughput vs Concurrency (Stream) ---
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for fw in FRAMEWORKS:
-        fw_data = [r for r in locust_data if r["framework"] == fw and r["endpoint"] == "stream"]
-        if fw_data:
-            x = [r["concurrency"] for r in fw_data]
-            y = [r["throughput_median_rps"] for r in fw_data]
-            ax.plot(x, y, marker="s", label=fw.capitalize(), color=colors[fw], linewidth=2)
-    ax.set_xlabel("Concurrency Level")
-    ax.set_ylabel("Throughput (req/s)")
-    ax.set_title("Streaming: Throughput vs Concurrency")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    ax.set_xscale("log", base=2)
-    ax.set_xticks(CONCURRENCY_LEVELS)
-    ax.set_xticklabels(CONCURRENCY_LEVELS)
-    plt.tight_layout()
-    plt.savefig(os.path.join(CHARTS_DIR, "throughput_stream.png"), dpi=150)
+    fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
+    plot_framework_lines(ax, locust_data, "stream", "throughput_median_rps")
+    style_framework_axes(ax, "Streaming: Throughput vs Concurrency", "Throughput (req/s)")
+    plt.savefig(os.path.join(CHARTS_DIR, "throughput_stream.png"), dpi=180, bbox_inches="tight")
     plt.close()
     print("  Saved: throughput_stream.png")
 
     # --- Chart 5: Pipeline E2E Latency ---
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for fw in FRAMEWORKS:
-        fw_data = [r for r in locust_data if r["framework"] == fw and r["endpoint"] == "pipeline"]
-        if fw_data:
-            x = [r["concurrency"] for r in fw_data]
-            y = [r["response_time_median_ms"] for r in fw_data]
-            ax.plot(x, y, marker="o", label=fw.capitalize(), color=colors[fw], linewidth=2)
-    ax.set_xlabel("Concurrency Level")
-    ax.set_ylabel("Median Response Time (ms)")
-    ax.set_title("Pipeline: Response Time vs Concurrency")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    ax.set_xscale("log", base=2)
-    ax.set_xticks(CONCURRENCY_LEVELS)
-    ax.set_xticklabels(CONCURRENCY_LEVELS)
-    plt.tight_layout()
-    plt.savefig(os.path.join(CHARTS_DIR, "response_time_pipeline.png"), dpi=150)
+    fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
+    plot_framework_lines(ax, locust_data, "pipeline", "response_time_median_ms")
+    style_framework_axes(ax, "Pipeline: Response Time vs Concurrency", "Median Response Time (ms)")
+    plt.savefig(os.path.join(CHARTS_DIR, "response_time_pipeline.png"), dpi=180, bbox_inches="tight")
     plt.close()
     print("  Saved: response_time_pipeline.png")
 
     # --- Chart 6: Throughput vs Concurrency (Pipeline) ---
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for fw in FRAMEWORKS:
-        fw_data = [r for r in locust_data if r["framework"] == fw and r["endpoint"] == "pipeline"]
-        if fw_data:
-            x = [r["concurrency"] for r in fw_data]
-            y = [r["throughput_median_rps"] for r in fw_data]
-            ax.plot(x, y, marker="s", label=fw.capitalize(), color=colors[fw], linewidth=2)
-    ax.set_xlabel("Concurrency Level")
-    ax.set_ylabel("Throughput (req/s)")
-    ax.set_title("Pipeline: Throughput vs Concurrency")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    ax.set_xscale("log", base=2)
-    ax.set_xticks(CONCURRENCY_LEVELS)
-    ax.set_xticklabels(CONCURRENCY_LEVELS)
-    plt.tight_layout()
-    plt.savefig(os.path.join(CHARTS_DIR, "throughput_pipeline.png"), dpi=150)
+    fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
+    plot_framework_lines(ax, locust_data, "pipeline", "throughput_median_rps")
+    style_framework_axes(ax, "Pipeline: Throughput vs Concurrency", "Throughput (req/s)")
+    plt.savefig(os.path.join(CHARTS_DIR, "throughput_pipeline.png"), dpi=180, bbox_inches="tight")
     plt.close()
     print("  Saved: throughput_pipeline.png")
 
-    # --- Chart 7: Peak Memory RSS (Inference) ---
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # --- Chart 7: Pipeline Stage 2 Inflation ---
+    if pipeline_data:
+        fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
+        for fw in FRAMEWORKS:
+            fw_data = sorted(
+                [r for r in pipeline_data if r["framework"] == fw],
+                key=lambda row: row["concurrency"],
+            )
+            if fw_data:
+                x = offset_concurrency_values([r["concurrency"] for r in fw_data], fw)
+                y = [r["stage2_median_ms"] for r in fw_data]
+                ax.plot(
+                    x,
+                    y,
+                    marker=framework_markers[fw],
+                    linestyle=line_styles[fw],
+                    label=fw.capitalize(),
+                    color=colors[fw],
+                    linewidth=line_width,
+                    markersize=marker_size,
+                    markerfacecolor="white",
+                    markeredgewidth=marker_edge_width,
+                    markeredgecolor=colors[fw],
+                    alpha=1.0,
+                    zorder=framework_zorder[fw],
+                )
+        style_framework_axes(
+            ax,
+            "Pipeline: Stage 2 Retrieval Delay vs Concurrency",
+            "Stage 2 Median Duration (ms)",
+        )
+        plt.savefig(os.path.join(CHARTS_DIR, "stage2_inflation.png"), dpi=180, bbox_inches="tight")
+        plt.close()
+        print("  Saved: stage2_inflation.png")
+
+    # --- Chart 8: Peak Memory RSS (Inference) ---
+    fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
     for fw in FRAMEWORKS:
-        fw_data = [r for r in resource_data if r["framework"] == fw and r["endpoint"] == "inference"]
+        fw_data = sorted(
+            [r for r in resource_data if r["framework"] == fw and r["endpoint"] == "inference"],
+            key=lambda row: row["concurrency"],
+        )
         if fw_data:
-            x = [r["concurrency"] for r in fw_data]
+            x = offset_concurrency_values([r["concurrency"] for r in fw_data], fw)
             y = [r["peak_rss_median_mb"] for r in fw_data]
-            ax.plot(x, y, marker="^", label=fw.capitalize(), color=colors[fw], linewidth=2)
-    ax.set_xlabel("Concurrency Level")
-    ax.set_ylabel("Peak Memory RSS (MB)")
-    ax.set_title("Inference: Peak Memory vs Concurrency")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    ax.set_xscale("log", base=2)
-    ax.set_xticks(CONCURRENCY_LEVELS)
-    ax.set_xticklabels(CONCURRENCY_LEVELS)
-    plt.tight_layout()
-    plt.savefig(os.path.join(CHARTS_DIR, "memory_inference.png"), dpi=150)
+            ax.plot(
+                x,
+                y,
+                marker=framework_markers[fw],
+                linestyle=line_styles[fw],
+                label=fw.capitalize(),
+                color=colors[fw],
+                linewidth=line_width,
+                markersize=marker_size,
+                markerfacecolor="white",
+                markeredgewidth=marker_edge_width,
+                markeredgecolor=colors[fw],
+                alpha=1.0,
+                zorder=framework_zorder[fw],
+            )
+    style_framework_axes(ax, "Inference: Peak Memory vs Concurrency", "Peak Memory RSS (MB)")
+    plt.savefig(os.path.join(CHARTS_DIR, "memory_inference.png"), dpi=180, bbox_inches="tight")
     plt.close()
     print("  Saved: memory_inference.png")
 
-    # --- Chart 8: TTFT Comparison ---
+    # --- Chart 9: TTFT Comparison ---
     if stream_data:
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
         for fw in FRAMEWORKS:
-            fw_data = [r for r in stream_data if r["framework"] == fw]
+            fw_data = sorted(
+                [r for r in stream_data if r["framework"] == fw],
+                key=lambda row: row["concurrency"],
+            )
             if fw_data:
-                x = [r["concurrency"] for r in fw_data]
+                x = offset_concurrency_values([r["concurrency"] for r in fw_data], fw)
                 y = [r["ttft_median_ms"] for r in fw_data]
-                ax.plot(x, y, marker="D", label=fw.capitalize(), color=colors[fw], linewidth=2)
-        ax.set_xlabel("Concurrency Level")
-        ax.set_ylabel("TTFT Median (ms)")
-        ax.set_title("Streaming: Time to First Token vs Concurrency")
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-        ax.set_xscale("log", base=2)
-        ax.set_xticks(CONCURRENCY_LEVELS)
-        ax.set_xticklabels(CONCURRENCY_LEVELS)
-        plt.tight_layout()
-        plt.savefig(os.path.join(CHARTS_DIR, "ttft_comparison.png"), dpi=150)
+                ax.plot(
+                    x,
+                    y,
+                    marker=framework_markers[fw],
+                    linestyle=line_styles[fw],
+                    label=fw.capitalize(),
+                    color=colors[fw],
+                    linewidth=line_width,
+                    markersize=marker_size,
+                    markerfacecolor="white",
+                    markeredgewidth=marker_edge_width,
+                    markeredgecolor=colors[fw],
+                    alpha=1.0,
+                    zorder=framework_zorder[fw],
+                )
+        style_framework_axes(ax, "Streaming: Time to First Token vs Concurrency", "TTFT Median (ms)")
+        plt.savefig(os.path.join(CHARTS_DIR, "ttft_comparison.png"), dpi=180, bbox_inches="tight")
         plt.close()
         print("  Saved: ttft_comparison.png")
 
-    # --- Chart 9: All frameworks throughput comparison (grouped bar) ---
+    # --- Chart 10: All frameworks throughput comparison (grouped bar) ---
     fig, axes = plt.subplots(1, 3, figsize=(18, 6), sharey=True)
     for idx, endpoint in enumerate(ENDPOINTS):
         ax = axes[idx]

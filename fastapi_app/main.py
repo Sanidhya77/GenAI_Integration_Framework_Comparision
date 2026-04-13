@@ -1,5 +1,5 @@
 """
-FastAPI application — ASGI asynchronous API-oriented framework.
+FastAPI application -ASGI asynchronous framework.
 
 Endpoints:
   /api/inference        — Standard request-response (Endpoint 1)
@@ -30,9 +30,7 @@ app = FastAPI()
 FRAMEWORK_NAME = "fastapi"
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 1: /api/inference — Standard request-response
-# ---------------------------------------------------------------------------
+# Endpoint 1: /api/inference (Standard request-response)
 
 @app.post("/api/inference")
 async def api_inference(request: Request):
@@ -49,9 +47,8 @@ async def api_inference(request: Request):
     return JSONResponse(content=result)
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 2: /api/inference/stream — SSE streaming
-# ---------------------------------------------------------------------------
+
+# Endpoint 2: /api/inference/stream  (SSE streaming)
 
 @app.post("/api/inference/stream")
 async def api_inference_stream(request: Request):
@@ -83,9 +80,9 @@ async def api_inference_stream(request: Request):
     )
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 3: /api/pipeline — Four-stage compound AI pipeline
-# ---------------------------------------------------------------------------
+
+# Endpoint 3: /api/pipeline  (Four-stage compound AI pipeline)
+
 
 @app.post("/api/pipeline")
 async def api_pipeline(request: Request):
@@ -102,9 +99,8 @@ async def api_pipeline(request: Request):
     return JSONResponse(content=result)
 
 
-# ---------------------------------------------------------------------------
 # Health check
-# ---------------------------------------------------------------------------
+
 
 @app.get("/health")
 async def health():
@@ -112,9 +108,9 @@ async def health():
     return JSONResponse(content={"status": "ok", "framework": FRAMEWORK_NAME})
 
 
-# ---------------------------------------------------------------------------
-# Development server (not used in experiment — Uvicorn is the server)
-# ---------------------------------------------------------------------------
+
+# Development server (Uvicorn)
+
 
 if __name__ == "__main__":
     import uvicorn

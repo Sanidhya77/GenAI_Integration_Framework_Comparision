@@ -1,11 +1,10 @@
 """
 Gunicorn configuration for Django.
 
-Uses default sync worker class (not gevent, not eventlet).
-Single worker to isolate framework-level behaviour from
+Uses default sync worker class (not gevent, not eventlet). Single worker to isolate framework-level behaviour from
 multi-process scaling effects.
 
-Run with:
+Run command:
   cd /home/sanidhya/experiment/django_app
   source ../venv/bin/activate
   gunicorn -c gunicorn_config.py config.wsgi:application

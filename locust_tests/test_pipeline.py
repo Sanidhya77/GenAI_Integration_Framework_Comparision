@@ -10,7 +10,7 @@ Metrics collected:
   - Tail Latency p95/p99 (ms) — Metric #6 (Locust native)
   - Error Rate (%) — Metric #7 (Locust native)
 
-Usage:
+Run command:
   cd /home/sanidhya/experiment
   locust -f locust_tests/test_pipeline.py --headless \
     -u <CONCURRENCY> -r <CONCURRENCY> \
@@ -34,9 +34,8 @@ from locust import HttpUser, task, between, events
 
 from common.config import USER_PROMPT
 
-# ---------------------------------------------------------------------------
 # Custom metrics storage
-# ---------------------------------------------------------------------------
+
 _pipeline_metrics = []
 _metrics_lock = threading.Lock()
 
@@ -44,7 +43,7 @@ _metrics_lock = threading.Lock()
 class PipelineUser(HttpUser):
     """Simulates users sending pipeline requests."""
 
-    wait_time = between(0, 0)  # No wait — sustain maximum concurrency
+    wait_time = between(0, 0)  # No wait to sustain maximum concurrency
 
     @task
     def pipeline(self):
@@ -93,9 +92,8 @@ class PipelineUser(HttpUser):
             })
 
 
-# ---------------------------------------------------------------------------
+
 # Save custom metrics on test stop
-# ---------------------------------------------------------------------------
 
 @events.quitting.add_listener
 def save_custom_metrics(environment, **kwargs):

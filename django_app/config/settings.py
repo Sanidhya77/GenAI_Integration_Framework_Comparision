@@ -1,8 +1,6 @@
 """
 Django settings for the experiment.
-
-Minimal configuration — only what is needed for the API endpoints.
-Default middleware retained as specified in Chapter 3.
+Minimal configuration with only what is needed for the API endpoints. Default middleware removed as specified in Chapter 3.
 No database, no templates, no static files.
 """
 
@@ -21,8 +19,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
-# Default middleware configuration retained (session, security)
-# as specified in the experiment context
+# Default middleware configuration retained (session, security) as specified in the experiment context
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",

@@ -7,14 +7,13 @@ Metrics collected:
   - Tail Latency p95/p99 (ms) — Metric #6 (Locust native)
   - Error Rate (%) — Metric #7 (Locust native)
 
-Usage:
+Run command:
   cd /home/sanidhya/experiment
   locust -f locust_tests/test_inference.py --headless \
     -u <CONCURRENCY> -r <CONCURRENCY> \
     -t 60s --host http://localhost:8000 \
     --csv data/<framework>/inference/run<N>
 
-All metrics for this endpoint are collected natively by Locust.
 """
 
 import sys
@@ -30,7 +29,7 @@ from common.config import USER_PROMPT
 class InferenceUser(HttpUser):
     """Simulates users sending standard inference requests."""
 
-    wait_time = between(0, 0)  # No wait — sustain maximum concurrency
+    wait_time = between(0, 0)  # No wait to sustain maximum concurrency
 
     @task
     def inference(self):

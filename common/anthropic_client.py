@@ -1,15 +1,15 @@
 """
-Anthropic API client wrappers for all four frameworks.
+Anthropic API client for all four frameworks.
 
-Provides synchronous and asynchronous versions of:
-  - Standard inference (Endpoint 1: /api/inference)
-  - Streaming inference (Endpoint 2: /api/inference/stream)
+Provides synchronous and asynchronous for:
+Standard inference (Endpoint 1: /api/inference)
+Streaming inference (Endpoint 2: /api/inference/stream)
 
 Sync clients (Anthropic) → Flask, Django
 Async clients (AsyncAnthropic) → FastAPI, Tornado
 
 When USE_SIMULATED is True, calls are redirected to the local
-simulated endpoint instead of the real Anthropic API.
+simulated endpoint.
 """
 
 import json
@@ -26,9 +26,9 @@ from common.config import (
     USE_SIMULATED,
 )
 
-# ---------------------------------------------------------------------------
-# Client singletons — created once, reused across requests
-# ---------------------------------------------------------------------------
+
+# Client singletons created once and reused across requests
+
 _sync_client = None
 _async_client = None
 
@@ -49,9 +49,9 @@ def get_async_client():
     return _async_client
 
 
-# ---------------------------------------------------------------------------
-# REAL API — Synchronous (Flask, Django)
-# ---------------------------------------------------------------------------
+
+# Synchronous (Flask, Django)
+
 
 def inference_sync(user_message):
     """Standard inference: send prompt, receive complete response.
@@ -102,9 +102,9 @@ def stream_sync(user_message):
             yield text
 
 
-# ---------------------------------------------------------------------------
-# REAL API — Asynchronous (FastAPI, Tornado)
-# ---------------------------------------------------------------------------
+
+# Asynchronous (FastAPI, Tornado)
+
 
 async def inference_async(user_message):
     """Async standard inference: send prompt, receive complete response.
@@ -156,9 +156,9 @@ async def stream_async(user_message):
             yield text
 
 
-# ---------------------------------------------------------------------------
-# SIMULATED ENDPOINT — Synchronous
-# ---------------------------------------------------------------------------
+
+# SIMULATED ENDPOINT for Synchronous
+
 
 def _simulated_inference_sync(user_message):
     """Call the local simulated inference endpoint (sync)."""
@@ -190,9 +190,9 @@ def _simulated_stream_sync(user_message):
                     yield data
 
 
-# ---------------------------------------------------------------------------
-# SIMULATED ENDPOINT — Asynchronous
-# ---------------------------------------------------------------------------
+
+# SIMULATED ENDPOINT for Asynchronous
+
 
 async def _simulated_inference_async(user_message):
     """Call the local simulated inference endpoint (async)."""

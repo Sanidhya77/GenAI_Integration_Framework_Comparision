@@ -1,7 +1,6 @@
 #!/bin/bash
-# =============================================================================
+#
 # Run 5 repetitions of one test configuration
-# =============================================================================
 #
 # Usage:
 #   ./scripts/run_config.sh <framework> <endpoint> <concurrency> <server_pid>

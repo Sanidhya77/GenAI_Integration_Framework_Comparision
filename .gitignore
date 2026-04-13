@@ -9,15 +9,22 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Test data (large CSV files generated during experiment)
-data/
+
+# Experiment outputs are committed to the repository
+# data/
+# results/
+
+# Local run outputs
 logs/
-results/
+
+# Local notes
+FUTURE_IMPROVEMENTS.md
 
 # Calibration data (generated, not committed)
 simulated_endpoint/calibration.json
 
-Experiment_Guide.md
+Experiment_Guide.md/
+
 # OS files
 .DS_Store
 Thumbs.db

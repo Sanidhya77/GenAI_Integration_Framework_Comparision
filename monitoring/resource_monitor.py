@@ -12,11 +12,6 @@ Metrics collected (Dimension 3):
 Usage:
   python monitoring/resource_monitor.py --pid <SERVER_PID> --output <CSV_PATH>
 
-  # Example:
-  python monitoring/resource_monitor.py --pid 12345 --output data/flask/inference/run1_resources.csv
-
-  # Stop with Ctrl+C — data is flushed on exit
-
 Output CSV columns:
   timestamp, elapsed_s, rss_mb, cpu_percent
 """
@@ -32,9 +27,7 @@ import psutil
 
 
 def get_process(pid):
-    """Get a psutil.Process object for the given PID.
-
-    Exits with an error if the process does not exist.
+    """Get a psutil.Process object for the given PID. Exits with an error if the process does not exist.
     """
     try:
         proc = psutil.Process(pid)
@@ -45,10 +38,8 @@ def get_process(pid):
 
 
 def monitor(pid, output_path, interval=1.0):
-    """Monitor a process and write resource data to CSV.
-
-    Samples RSS memory and CPU usage at the specified interval.
-    Handles Ctrl+C gracefully to ensure data is flushed.
+    """Monitor a process and write resource data to CSV such as Samples RSS memory and CPU usage at the specified interval.
+    Handles Ctrl+C to ensure data is flushed.
     """
     proc = get_process(pid)
 
@@ -122,7 +113,6 @@ def monitor(pid, output_path, interval=1.0):
             if sample_count % 10 == 0:
                 print(f"  [{elapsed:.0f}s] RSS: {rss_mb:.1f} MB | CPU: {cpu_pct:.1f}%")
 
-    # Summary
     memory_growth = round(peak_rss - idle_rss, 2)
     print(f"\n--- Monitoring Summary ---")
     print(f"Samples collected: {sample_count}")

@@ -24,9 +24,8 @@ from common.pipeline_service import run_pipeline_sync
 FRAMEWORK_NAME = "django"
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 1: /api/inference — Standard request-response
-# ---------------------------------------------------------------------------
+# Endpoint 1: /api/inference  (Standard request-response)
+
 
 @csrf_exempt
 @require_POST
@@ -44,9 +43,9 @@ def api_inference(request):
     return JsonResponse(result)
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 2: /api/inference/stream — SSE streaming
-# ---------------------------------------------------------------------------
+
+# Endpoint 2: /api/inference/stream (SSE streaming)
+
 
 @csrf_exempt
 @require_POST
@@ -78,9 +77,9 @@ def api_inference_stream(request):
     return response
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 3: /api/pipeline — Four-stage compound AI pipeline
-# ---------------------------------------------------------------------------
+
+# Endpoint 3: /api/pipeline (Four-stage compound AI pipeline)
+
 
 @csrf_exempt
 @require_POST
@@ -98,9 +97,8 @@ def api_pipeline(request):
     return JsonResponse(result)
 
 
-# ---------------------------------------------------------------------------
+
 # Health check
-# ---------------------------------------------------------------------------
 
 @require_GET
 def health(request):

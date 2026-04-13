@@ -8,7 +8,7 @@ Type 1: Research of Current Solutions (A-S-SV Model)
 
 ## Overview
 
-This repository contains the experiment prototype for comparing four Python web frameworks under Generative AI integration workloads. The experiment measures how each framework handles real-time LLM inference requests, token-by-token streaming, and multi-stage compound AI pipelines.
+This repository compares four Python web frameworks under Generative AI workloads. It measures standard inference, token streaming, and a multi-stage pipeline so the framework itself stays the main variable.
 
 ## Frameworks Under Test
 
@@ -21,17 +21,17 @@ This repository contains the experiment prototype for comparing four Python web 
 
 ## Experiment Design
 
-Each framework implements three identical API endpoints:
+Each framework exposes the same three API endpoints:
 
-1. **`/api/inference`** — Standard request-response: receives a prompt, calls the Anthropic API, returns a complete JSON response.
-2. **`/api/inference/stream`** — Streaming via SSE: forwards tokens from the Anthropic API to the client as they are generated.
-3. **`/api/pipeline`** — Four-stage compound AI pipeline (RAG pattern):
-   - Stage 1: Query analysis (local computation)
-   - Stage 2: Context retrieval from document store + 50ms simulated vector DB latency
-   - Stage 3: Augmented inference via Anthropic API
-   - Stage 4: Post-processing and response formatting
+1. **`/api/inference`** — standard request-response inference.
+2. **`/api/inference/stream`** — SSE token streaming.
+3. **`/api/pipeline`** — four-stage RAG-style pipeline:
+  - Stage 1: query analysis
+  - Stage 2: context retrieval with 50 ms simulated vector DB latency
+  - Stage 3: augmented inference
+  - Stage 4: formatting and post-processing
 
-All business logic is shared through a `common/` module to ensure the only variable is the framework architecture.
+Shared logic lives in `common/`, so the comparison focuses on framework behaviour.
 
 ## Evaluation Metrics (13 Metrics, 4 Dimensions)
 
@@ -49,12 +49,23 @@ E2E Pipeline Latency, Stage-Level Timing, Pipeline Completion Rate
 
 ## Hybrid Testing Approach
 
-- **Real API** (concurrency 1, 5, 10): All endpoints use the live Anthropic API with `claude-haiku-4-5`.
-- **Simulated endpoint** (concurrency 25, 50, 100): A local mock server calibrated to real API response characteristics replaces the Anthropic API to test pure framework concurrency behaviour.
+- **Concurrency 1, 5, 10**: live Anthropic API.
+- **Concurrency 25, 50, 100**: local simulated endpoint calibrated from real API runs.
 
 ## Test Matrix
 
 - 4 frameworks × 3 endpoints × 6 concurrency levels × 5 runs = **360 total test executions**
+
+## Results Data
+
+The processed results CSV files are committed in the GitHub repository under `results/`.
+
+- `summary_locust_stats.csv` — request and latency stats
+- `summary_pipeline_custom.csv` — pipeline timing stats
+- `summary_resources.csv` — CPU and memory stats
+- `summary_stream_custom.csv` — streaming stats such as TTFT and TPOT
+
+Raw run outputs are stored under `data/` by framework, endpoint, and concurrency level.
 
 ## Project Structure
 
@@ -111,7 +122,7 @@ experiment/
 │   └── tornado/
 │
 ├── logs/                       # Pipeline stage timing logs
-├── results/                    # Processed data for Chapter 4
+├── results/                    # Processed CSV summaries committed in GitHub repo
 └── .env                        # API key (not committed)
 ```
 
@@ -174,12 +185,3 @@ python monitoring/resource_monitor.py --pid <SERVER_PID> --output data/flask/inf
 - **Temperature:** 0.0 (deterministic)
 - **System prompt:** "You are a technical assistant specialising in web development."
 
-## Thesis Chapter Mapping
-
-| Chapter | Content | Status |
-|---------|---------|--------|
-| Chapter 1 | Theoretical Background | ✅ Complete |
-| Chapter 2 | Literature Review and Framework Analysis | ✅ Complete |
-| Chapter 3 | Methodology and Experimental Design | ✅ Complete |
-| Chapter 4 | Results and Discussion | ⏳ Pending experiment |
-| Chapter 5 | Scenarios and Validated Recommendations | ⏳ Pending results |

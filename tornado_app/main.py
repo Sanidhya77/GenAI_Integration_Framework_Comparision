@@ -1,5 +1,5 @@
 """
-Tornado application — Native event loop, asynchronous framework.
+Tornado application a Native event loop, asynchronous framework.
 
 Endpoints:
   /api/inference        — Standard request-response (Endpoint 1)
@@ -31,9 +31,8 @@ from common.pipeline_service import run_pipeline_async
 FRAMEWORK_NAME = "tornado"
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 1: /api/inference — Standard request-response
-# ---------------------------------------------------------------------------
+
+# Endpoint 1: /api/inference (Standard request-response)
 
 class InferenceHandler(tornado.web.RequestHandler):
     """Receive prompt, call Anthropic API, return complete JSON response."""
@@ -52,9 +51,9 @@ class InferenceHandler(tornado.web.RequestHandler):
         self.write(json.dumps(result))
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 2: /api/inference/stream — SSE streaming
-# ---------------------------------------------------------------------------
+
+# Endpoint 2: /api/inference/stream  (SSE streaming)
+
 
 class InferenceStreamHandler(tornado.web.RequestHandler):
     """Receive prompt, stream tokens via Server-Sent Events."""
@@ -83,9 +82,9 @@ class InferenceStreamHandler(tornado.web.RequestHandler):
         self.flush()
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 3: /api/pipeline — Four-stage compound AI pipeline
-# ---------------------------------------------------------------------------
+
+# Endpoint 3: /api/pipeline (Four-stage compound AI pipeline)
+
 
 class PipelineHandler(tornado.web.RequestHandler):
     """Execute the 4-stage RAG pipeline and return result with stage timings."""
@@ -104,9 +103,9 @@ class PipelineHandler(tornado.web.RequestHandler):
         self.write(json.dumps(result))
 
 
-# ---------------------------------------------------------------------------
+
 # Health check
-# ---------------------------------------------------------------------------
+
 
 class HealthHandler(tornado.web.RequestHandler):
     """Simple health check for verifying server is running."""
@@ -116,9 +115,9 @@ class HealthHandler(tornado.web.RequestHandler):
         self.write(json.dumps({"status": "ok", "framework": FRAMEWORK_NAME}))
 
 
-# ---------------------------------------------------------------------------
+
 # Application setup
-# ---------------------------------------------------------------------------
+
 
 def make_app():
     """Create the Tornado application with URL routing."""

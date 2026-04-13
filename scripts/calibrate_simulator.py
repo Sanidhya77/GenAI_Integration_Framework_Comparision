@@ -6,16 +6,14 @@ Runs a small number of real Anthropic API calls to determine:
   - Tokens per second rate (becomes the simulated streaming rate)
   - Average response token count (becomes the simulated payload size)
 
-These values are saved to simulated_endpoint/calibration.json and
-used by the simulator to produce realistic timing behaviour.
+These values are saved to simulated_endpoint/calibration.json and used by the simulator to produce realistic timing behaviour.
 
-Usage:
+Run command:
   cd /home/sanidhya/experiment
   source venv/bin/activate
   export $(cat .env | xargs)
   python scripts/calibrate_simulator.py
 
-Cost: ~$0.01 (5 inference + 5 streaming calls with 256 max tokens)
 """
 
 import json

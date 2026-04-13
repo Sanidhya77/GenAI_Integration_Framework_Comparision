@@ -5,8 +5,6 @@ Implements keyword-based search over genai_concepts.txt and returns
 the most relevant passage. Provides both synchronous and asynchronous
 versions with a controlled 50ms delay simulating vector DB latency.
 
-Both versions use IDENTICAL search logic — the only difference is
-the sleep mechanism (time.sleep vs asyncio.sleep).
 """
 
 import asyncio

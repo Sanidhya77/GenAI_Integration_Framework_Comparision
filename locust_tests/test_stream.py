@@ -35,9 +35,9 @@ from locust import HttpUser, task, between, events
 
 from common.config import USER_PROMPT
 
-# ---------------------------------------------------------------------------
+
 # Custom metrics storage
-# ---------------------------------------------------------------------------
+
 # Thread-safe list to collect per-request streaming metrics
 _stream_metrics = []
 _metrics_lock = threading.Lock()
@@ -46,7 +46,7 @@ _metrics_lock = threading.Lock()
 class StreamingUser(HttpUser):
     """Simulates users sending streaming inference requests."""
 
-    wait_time = between(0, 0)  # No wait — sustain maximum concurrency
+    wait_time = between(0, 0)  # No wait to sustain maximum concurrency
 
     @task
     def stream_inference(self):
@@ -59,8 +59,7 @@ class StreamingUser(HttpUser):
         exception = None
 
         try:
-            # Use requests directly for streaming (Locust client doesn't
-            # handle SSE iteration well)
+            # Use requests directly for streaming (Locust client doesn't handle SSE iteration well)
             response = requests.post(
                 f"{self.host}/api/inference/stream",
                 json={"prompt": USER_PROMPT},
@@ -133,9 +132,8 @@ class StreamingUser(HttpUser):
             })
 
 
-# ---------------------------------------------------------------------------
+
 # Save custom metrics on test stop
-# ---------------------------------------------------------------------------
 
 @events.quitting.add_listener
 def save_custom_metrics(environment, **kwargs):

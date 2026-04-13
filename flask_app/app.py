@@ -1,5 +1,5 @@
 """
-Flask application — WSGI synchronous micro-framework.
+Flask application — WSGI synchronous framework.
 
 Endpoints:
   /api/inference        — Standard request-response (Endpoint 1)
@@ -30,9 +30,9 @@ app = Flask(__name__)
 FRAMEWORK_NAME = "flask"
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 1: /api/inference — Standard request-response
-# ---------------------------------------------------------------------------
+
+# Endpoint 1: /api/inference (Standard request-response)
+
 
 @app.route("/api/inference", methods=["POST"])
 def api_inference():
@@ -45,9 +45,9 @@ def api_inference():
     return jsonify(result)
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 2: /api/inference/stream — SSE streaming
-# ---------------------------------------------------------------------------
+
+# Endpoint 2: /api/inference/stream (SSE streaming)
+
 
 @app.route("/api/inference/stream", methods=["POST"])
 def api_inference_stream():
@@ -75,9 +75,8 @@ def api_inference_stream():
     )
 
 
-# ---------------------------------------------------------------------------
-# Endpoint 3: /api/pipeline — Four-stage compound AI pipeline
-# ---------------------------------------------------------------------------
+
+# Endpoint 3: /api/pipeline (Four-stage compound AI pipeline)
 
 @app.route("/api/pipeline", methods=["POST"])
 def api_pipeline():
@@ -89,10 +88,7 @@ def api_pipeline():
 
     return jsonify(result)
 
-
-# ---------------------------------------------------------------------------
 # Health check
-# ---------------------------------------------------------------------------
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -100,9 +96,8 @@ def health():
     return jsonify({"status": "ok", "framework": FRAMEWORK_NAME})
 
 
-# ---------------------------------------------------------------------------
-# Development server (not used in experiment — Gunicorn is the server)
-# ---------------------------------------------------------------------------
+
+# Development server (Gunicorn)
 
 if __name__ == "__main__":
     from common.config import SERVER_HOST, SERVER_PORT

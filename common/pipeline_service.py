@@ -1,15 +1,12 @@
 """
 Four-stage compound AI pipeline for Endpoint 3 (/api/pipeline).
 
-Implements the RAG-pattern pipeline defined in Chapter 3:
+The RAG-pattern pipeline defined in Chapter 3:
   Stage 1 — Query Analysis (LOCAL): Parse prompt, construct retrieval query
   Stage 2 — Context Retrieval (I/O-BOUND): Search document store + 50ms delay
   Stage 3 — Augmented Inference (API CALL): Send augmented prompt to Anthropic
   Stage 4 — Post-processing (LOCAL): Parse and format the response
 
-Both sync and async versions are provided. The business logic is identical —
-only the I/O primitives differ (time.sleep vs asyncio.sleep, Anthropic vs
-AsyncAnthropic).
 
 Stage-level timing (Metric #12) is recorded for every pipeline execution
 and included in the response payload.
@@ -55,9 +52,9 @@ def _log_stage_timing(framework_name, stage_timings):
         f.write(json.dumps(stage_timings) + "\n")
 
 
-# ---------------------------------------------------------------------------
-# Stage implementations — Synchronous
-# ---------------------------------------------------------------------------
+
+# Stage implementations for Synchronous
+
 
 def _stage1_query_analysis_sync(user_query):
     """Stage 1 (LOCAL): Parse the user query and construct a retrieval query.
@@ -85,9 +82,8 @@ def _stage4_postprocess_sync(api_response):
     }
 
 
-# ---------------------------------------------------------------------------
-# Synchronous pipeline (Flask, Django)
-# ---------------------------------------------------------------------------
+# Synchronous pipeline for Flask and Django
+
 
 def run_pipeline_sync(user_query, framework_name="unknown"):
     """Execute the full 4-stage pipeline synchronously.
@@ -134,9 +130,9 @@ def run_pipeline_sync(user_query, framework_name="unknown"):
     }
 
 
-# ---------------------------------------------------------------------------
-# Asynchronous pipeline (FastAPI, Tornado)
-# ---------------------------------------------------------------------------
+
+# Asynchronous pipeline for FastAPI and Tornado
+
 
 async def run_pipeline_async(user_query, framework_name="unknown"):
     """Execute the full 4-stage pipeline asynchronously.
