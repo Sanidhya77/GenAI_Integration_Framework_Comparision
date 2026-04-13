@@ -184,4 +184,3 @@ python monitoring/resource_monitor.py --pid <SERVER_PID> --output data/flask/inf
 - **Max tokens:** 256
 - **Temperature:** 0.0 (deterministic)
 - **System prompt:** "You are a technical assistant specialising in web development."
-
