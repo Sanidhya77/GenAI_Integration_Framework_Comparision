@@ -533,6 +533,13 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
         "fastapi": 4,
         "tornado": 5,
     }
+    label_offsets = {
+        # (x offset in points, y offset in points)
+        "flask": (-16, 16),
+        "django": (16, -18),
+        "fastapi": (-16, -18),
+        "tornado": (16, 16),
+    }
     line_width = 2.8
     marker_size = 8.0
     marker_edge_width = 1.8
@@ -552,7 +559,41 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
         ax.set_xticklabels(CONCURRENCY_LEVELS)
         ax.set_xlim(min(CONCURRENCY_LEVELS) * 0.85, max(CONCURRENCY_LEVELS) * 1.15)
 
-    def plot_framework_lines(ax, records, endpoint, value_key):
+    def annotate_points(ax, x_values, y_values, color, value_fmt="{:.2f}", x_offset=0, y_offset=7):
+        """Annotate each plotted point with its numeric value."""
+        for x_val, y_val in zip(x_values, y_values):
+            if y_val is None:
+                continue
+            va = "bottom" if y_offset >= 0 else "top"
+            ax.annotate(
+                value_fmt.format(y_val),
+                xy=(x_val, y_val),
+                xytext=(x_offset, y_offset),
+                textcoords="offset points",
+                ha="center",
+                va=va,
+                fontsize=7.5,
+                color=color,
+                bbox=dict(boxstyle="round,pad=0.14", fc="white", ec=color, lw=0.7, alpha=0.85),
+            )
+
+    def annotate_bars(ax, bar_container, value_fmt="{:.2f}"):
+        """Annotate grouped bars with values above each bar."""
+        for bar in bar_container:
+            height = bar.get_height()
+            ax.annotate(
+                value_fmt.format(height),
+                xy=(bar.get_x() + bar.get_width() / 2, height),
+                xytext=(0, 3),
+                textcoords="offset points",
+                ha="center",
+                va="bottom",
+                fontsize=6.8,
+                color="#111827",
+                rotation=90,
+            )
+
+    def plot_framework_lines(ax, records, endpoint, value_key, value_fmt="{:.2f}"):
         for fw in FRAMEWORKS:
             fw_data = sorted(
                 [r for r in records if r["framework"] == fw and r["endpoint"] == endpoint],
@@ -576,10 +617,12 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
                     alpha=1.0,
                     zorder=framework_zorder[fw],
                 )
+                x_off, y_off = label_offsets[fw]
+                annotate_points(ax, x, y, colors[fw], value_fmt=value_fmt, x_offset=x_off, y_offset=y_off)
 
     # --- Chart 1: Response Time vs Concurrency (Inference) ---
     fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
-    plot_framework_lines(ax, locust_data, "inference", "response_time_median_ms")
+    plot_framework_lines(ax, locust_data, "inference", "response_time_median_ms", value_fmt="{:,.0f}")
     style_framework_axes(ax, "Inference: Response Time vs Concurrency", "Median Response Time (ms)")
     plt.savefig(os.path.join(CHARTS_DIR, "response_time_inference.png"), dpi=180, bbox_inches="tight")
     plt.close()
@@ -595,7 +638,7 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
 
     # --- Chart 3: Response Time vs Concurrency (Stream) ---
     fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
-    plot_framework_lines(ax, locust_data, "stream", "response_time_median_ms")
+    plot_framework_lines(ax, locust_data, "stream", "response_time_median_ms", value_fmt="{:,.0f}")
     style_framework_axes(ax, "Streaming: Response Time vs Concurrency", "Median Response Time (ms)")
     plt.savefig(os.path.join(CHARTS_DIR, "response_time_stream.png"), dpi=180, bbox_inches="tight")
     plt.close()
@@ -611,7 +654,7 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
 
     # --- Chart 5: Pipeline E2E Latency ---
     fig, ax = plt.subplots(figsize=(11, 6.5), constrained_layout=True)
-    plot_framework_lines(ax, locust_data, "pipeline", "response_time_median_ms")
+    plot_framework_lines(ax, locust_data, "pipeline", "response_time_median_ms", value_fmt="{:,.0f}")
     style_framework_axes(ax, "Pipeline: Response Time vs Concurrency", "Median Response Time (ms)")
     plt.savefig(os.path.join(CHARTS_DIR, "response_time_pipeline.png"), dpi=180, bbox_inches="tight")
     plt.close()
@@ -651,6 +694,8 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
                     alpha=1.0,
                     zorder=framework_zorder[fw],
                 )
+                x_off, y_off = label_offsets[fw]
+                annotate_points(ax, x, y, colors[fw], value_fmt="{:.1f}", x_offset=x_off, y_offset=y_off)
         style_framework_axes(
             ax,
             "Pipeline: Stage 2 Retrieval Delay vs Concurrency",
@@ -685,6 +730,8 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
                 alpha=1.0,
                 zorder=framework_zorder[fw],
             )
+            x_off, y_off = label_offsets[fw]
+            annotate_points(ax, x, y, colors[fw], value_fmt="{:.1f}", x_offset=x_off, y_offset=y_off)
     style_framework_axes(ax, "Inference: Peak Memory vs Concurrency", "Peak Memory RSS (MB)")
     plt.savefig(os.path.join(CHARTS_DIR, "memory_inference.png"), dpi=180, bbox_inches="tight")
     plt.close()
@@ -716,6 +763,8 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
                     alpha=1.0,
                     zorder=framework_zorder[fw],
                 )
+                x_off, y_off = label_offsets[fw]
+                annotate_points(ax, x, y, colors[fw], value_fmt="{:,.0f}", x_offset=x_off, y_offset=y_off)
         style_framework_axes(ax, "Streaming: Time to First Token vs Concurrency", "TTFT Median (ms)")
         plt.savefig(os.path.join(CHARTS_DIR, "ttft_comparison.png"), dpi=180, bbox_inches="tight")
         plt.close()
@@ -733,7 +782,8 @@ def generate_charts(locust_data, resource_data, stream_data, pipeline_data):
             if fw_data:
                 y = [r["throughput_median_rps"] for r in fw_data]
                 positions = [x + fw_idx * bar_width for x in x_positions]
-                ax.bar(positions, y, bar_width, label=fw.capitalize(), color=colors[fw])
+                bars = ax.bar(positions, y, bar_width, label=fw.capitalize(), color=colors[fw])
+                annotate_bars(ax, bars)
 
         ax.set_xlabel("Concurrency Level")
         ax.set_ylabel("Throughput (req/s)")
